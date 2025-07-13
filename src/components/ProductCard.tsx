@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ProductWithImages } from "@/integrations/supabase/types";
+import { Tables } from "@/integrations/supabase/types";
+
+// Local type for product with images
+export type ProductWithImages = Tables<'products'> & { product_images: { image_url: string }[] };
 
 export const ProductCard = ({ product }: { product: ProductWithImages }) => {
   return (

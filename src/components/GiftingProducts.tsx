@@ -1,9 +1,10 @@
+
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from 'embla-carousel-react';
 import { supabase } from '@/integrations/supabase/client';
-import type { ProductWithImages } from '@/integrations/supabase/types';
+import { ProductWithImages } from './ProductCard';
 
 export const GiftingProducts = () => {
   const [products, setProducts] = useState<ProductWithImages[]>([]);
