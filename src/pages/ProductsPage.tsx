@@ -18,16 +18,37 @@ export const ProductsPage = () => {
         )
       `);
 
-      if (subCategory) {
-        query = query.eq("sub_category", subCategory);
-      } else if (category) {
-        const { data: categoryData } = await supabase
+      if (category) {
+        const { data: categoryData, error: categoryError } = await supabase
           .from("categories")
-          .select("id")
+          .select("id, sub_categories")
           .eq("slug", category)
           .single();
+
+        if (categoryError) {
+          console.error("Error fetching category:", categoryError);
+          return;
+        }
+
         if (categoryData) {
-          query = query.eq("category_id", categoryData.id);
+          if (subCategory) {
+            const slugify = (str: string) =>
+              str.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+            const originalSubCategory =
+              categoryData.sub_categories?.find(
+                (sc) => slugify(sc) === subCategory
+              ) || null;
+
+            if (originalSubCategory) {
+              query = query.eq("sub_category", originalSubCategory);
+            } else {
+              // Handle case where subCategory slug doesn't match any sub_category
+              setProducts([]);
+              return;
+            }
+          } else {
+            query = query.eq("category_id", categoryData.id);
+          }
         }
       }
 

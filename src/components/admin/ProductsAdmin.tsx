@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,12 @@ export const ProductsAdmin = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { toast } = useToast();
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const inputRefs: Record<string, React.RefObject<HTMLInputElement>> = {
+    name: useRef<HTMLInputElement>(null),
+    price: useRef<HTMLInputElement>(null),
+    stock_quantity: useRef<HTMLInputElement>(null),
+  };
 
   const initialFormData = {
     name: '',
@@ -125,10 +131,10 @@ export const ProductsAdmin = () => {
     const uploadPromises = formData.gallery_files.map(async (file) => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `products/${productId}/${fileName}`;
+      const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('product_images')
+        .from('products')
         .upload(filePath, file);
 
       if (uploadError) {
@@ -136,7 +142,7 @@ export const ProductsAdmin = () => {
       }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('product_images')
+        .from('products')
         .getPublicUrl(filePath);
 
       return {
@@ -156,10 +162,29 @@ export const ProductsAdmin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const errors: Record<string, string> = {};
+    if (!formData.name) errors.name = "Product name is required.";
+    if (!formData.price) errors.price = "Price is required.";
+    if (!formData.stock_quantity) errors.stock_quantity = "Stock quantity is required.";
+    
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      toast({
+        title: "Validation Error",
+        description: "Please fill all required fields.",
+        variant: "destructive",
+      });
+      const firstErrorKey = Object.keys(errors)[0];
+      if (firstErrorKey && inputRefs[firstErrorKey]?.current) {
+        inputRefs[firstErrorKey].current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        inputRefs[firstErrorKey].current?.focus();
+      }
+      return;
+    }
     
     const productData = {
       name: formData.name,
-      slug: formData.name.toLowerCase().replace(/\s+/g, '-'),
+      slug: `${formData.name.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substring(2, 7)}`,
       description: formData.description,
       price: parseFloat(formData.price),
       original_price: formData.original_price ? parseFloat(formData.original_price) : null,
@@ -195,7 +220,7 @@ export const ProductsAdmin = () => {
       if (editingProduct) {
         const { data, error } = await supabase
           .from('products')
-          .update(productData)
+          .update({ ...productData, slug: editingProduct.slug || `${formData.name.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substring(2, 7)}` })
           .eq('id', editingProduct.id)
           .select()
           .single();
@@ -295,6 +320,7 @@ export const ProductsAdmin = () => {
   const resetForm = () => {
     setFormData(initialFormData);
     setEditingProduct(null);
+    setFormErrors({});
   };
 
   const handleFaqChange = (index: number, field: 'question' | 'answer', value: string) => {
@@ -335,7 +361,8 @@ export const ProductsAdmin = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Product Name</Label>
-                  <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                  <Input id="name" ref={inputRefs.name} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                  {formErrors.name && <p className="text-red-500 text-sm">{formErrors.name}</p>}
                 </div>
                 <div>
                   <Label htmlFor="model">Model</Label>
@@ -356,7 +383,8 @@ export const ProductsAdmin = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <Label htmlFor="price">Price</Label>
-                  <Input id="price" type="number" step="0.01" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
+                  <Input id="price" type="number" step="0.01" ref={inputRefs.price} value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
+                  {formErrors.price && <p className="text-red-500 text-sm">{formErrors.price}</p>}
                 </div>
                 <div>
                   <Label htmlFor="original_price">Original Price</Label>
@@ -364,7 +392,8 @@ export const ProductsAdmin = () => {
                 </div>
                 <div>
                   <Label htmlFor="stock_quantity">Stock Quantity</Label>
-                  <Input id="stock_quantity" type="number" value={formData.stock_quantity} onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })} required />
+                  <Input id="stock_quantity" type="number" ref={inputRefs.stock_quantity} value={formData.stock_quantity} onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })} required />
+                  {formErrors.stock_quantity && <p className="text-red-500 text-sm">{formErrors.stock_quantity}</p>}
                 </div>
                 <div>
                   <Label htmlFor="sequence">Sequence</Label>

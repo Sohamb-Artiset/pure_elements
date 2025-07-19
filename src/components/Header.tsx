@@ -29,7 +29,7 @@ interface NavItem {
 
 export const Header = () => {
   const { user, profile, signOut } = useAuth();
-  const [cartItems, setCartItems] = useState(2);
+  const [cartItems, setCartItems] = useState(0);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -123,6 +123,24 @@ export const Header = () => {
     fetchNavItems();
   }, []);
 
+  // Fetch real cart count for the logged-in user
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      if (!user) {
+        setCartItems(0);
+        return;
+      }
+      const { count, error } = await supabase
+        .from('cart')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      if (!error) {
+        setCartItems(count || 0);
+      }
+    };
+    fetchCartCount();
+  }, [user, isCartOpen]); // refetch when user changes or cart sidebar is closed
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -169,8 +187,12 @@ export const Header = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Profile</DropdownMenuItem>
-                      <DropdownMenuItem>My Orders</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/profile">Profile</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/my-orders">My Orders</Link>
+                      </DropdownMenuItem>
                       {profile?.role === 'admin' && (
                         <DropdownMenuItem asChild>
                           <Link to="/admin">Admin Dashboard</Link>

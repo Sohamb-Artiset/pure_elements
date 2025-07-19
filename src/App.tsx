@@ -13,6 +13,8 @@ import ProductDetail from "./pages/ProductDetail";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import { ProductsPage } from "./pages/ProductsPage";
+import Profile from "./pages/Profile";
+import MyOrders from "./pages/MyOrders";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +48,8 @@ const App = () => {
               <Route path="/products/:category/:subCategory" element={<ProductsPage />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/my-orders" element={<MyOrders />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <FloatingCart />

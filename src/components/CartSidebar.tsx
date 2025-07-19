@@ -1,9 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Plus, Minus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CartItem {
   id: string;
@@ -21,24 +22,39 @@ interface CartSidebarProps {
 
 export const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
   const { user } = useAuth();
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: "1",
-      name: "Lemon Ginger Scrubbing Body Wash",
-      price: "₹550.00",
-      image: "/placeholder.svg",
-      quantity: 1,
-      size: "300 ML"
-    },
-    {
-      id: "2",
-      name: "Rose Shea Butter Body Cream",
-      price: "₹450.00",
-      image: "/placeholder.svg",
-      quantity: 2,
-      size: "200 ML"
-    }
-  ]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch real cart items when sidebar opens or user changes
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      if (!user || !isOpen) {
+        setCartItems([]);
+        return;
+      }
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("cart")
+        .select(`id, quantity, product:product_id (name, price, size, product_images(image_url))`)
+        .eq("user_id", user.id);
+      if (!error && Array.isArray(data)) {
+        setCartItems(
+          data.map((item: any) => ({
+            id: item.id,
+            name: item.product?.name || "",
+            price: item.product?.price ? `₹${item.product.price}` : "",
+            image: item.product?.product_images?.[0]?.image_url || "/placeholder.svg",
+            quantity: item.quantity,
+            size: item.product?.size || undefined,
+          }))
+        );
+      } else {
+        setCartItems([]);
+      }
+      setLoading(false);
+    };
+    fetchCartItems();
+  }, [user, isOpen]);
 
   const recommendedProducts = [
     { id: "3", name: "Nourishing Body Massage Oil", price: "₹500.00", image: "/placeholder.svg" },
@@ -89,6 +105,8 @@ export const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
                 <p className="text-gray-500 mb-4">Please sign in to view your cart</p>
                 <Button onClick={onClose}>Sign In</Button>
               </div>
+            ) : loading ? (
+              <div className="text-center py-8 text-gray-500">Loading cart...</div>
             ) : cartItems.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500 mb-4">Your cart is empty</p>

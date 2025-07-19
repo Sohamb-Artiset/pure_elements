@@ -6,32 +6,32 @@ import useEmblaCarousel from 'embla-carousel-react';
 const concerns = [
   {
     name: "Hair Strengthening",
-    image: "/public/Concerns/hair-strengthening.jpg",
+    image: "https://jvirnmqoonkauanvslun.supabase.co/storage/v1/object/public/landing-page/Shop%20by%20Concern/imgi_41_Hair-Strengthning-5.jpg",
     link: "/product/hair-strengthening"
   },
   {
     name: "Anti Dandruff",
-    image: "/public/Concerns/anti-dandruff.jpg",
+    image: "https://jvirnmqoonkauanvslun.supabase.co/storage/v1/object/public/landing-page/Shop%20by%20Concern/imgi_42_Anti-Dandruff.jpg",
     link: "/product/anti-dandruff"
   },
   {
     name: "Anti Acne",
-    image: "/public/Concerns/anti-acne.jpg",
+    image: "https://jvirnmqoonkauanvslun.supabase.co/storage/v1/object/public/landing-page/Shop%20by%20Concern/imgi_43_Anti-Acne.jpg",
     link: "/product/anti-acne"
   },
   {
     name: "Anti Aging",
-    image: "/public/Concerns/anti-aging.jpg",
+    image: "https://jvirnmqoonkauanvslun.supabase.co/storage/v1/object/public/landing-page/Shop%20by%20Concern/imgi_44_Anti-Aging-2.jpg",
     link: "/product/anti-aging"
   },
   {
     name: "Skin Brightening",
-    image: "/public/Concerns/skin-brightening.jpg",
+    image: "https://jvirnmqoonkauanvslun.supabase.co/storage/v1/object/public/landing-page/Shop%20by%20Concern/imgi_39_Skin-Brightning-3.jpg",
     link: "/product/skin-brightening"
   },
   {
     name: "Anti Pigmentation",
-    image: "/public/Concerns/anti-pigmentation.jpg",
+    image: "https://jvirnmqoonkauanvslun.supabase.co/storage/v1/object/public/landing-page/Shop%20by%20Concern/imgi_40_Anti-Pigmantation-4.jpg",
     link: "/product/anti-pigmentation"
   },
   // Add more concerns as needed
@@ -93,8 +93,8 @@ export const ConcernsSection = () => {
         <div className="text-center mb-12">
           <h2 className="text-4xl font-serif font-semibold text-gray-800 mb-0" style={{ fontFamily: 'Montserrat, serif' }}>Shop By Concerns</h2>
         </div>
-        <div className="relative overflow-visible">
-          <div className="embla overflow-visible" ref={emblaRef}>
+        <div className="relative">
+          <div className="embla overflow-x-hidden" ref={emblaRef}>
             <div className="embla__container flex">
               {concerns.map((concern, index) => (
                 <a
@@ -104,12 +104,12 @@ export const ConcernsSection = () => {
                   style={{ flex: '0 0 25%', minWidth: '25%' }}
                 >
                   <div
-                    className="w-full h-[400px] bg-cover bg-center rounded-xl overflow-hidden relative shadow-md group-hover:shadow-xl transition-shadow"
+                    className="w-full h-[400px] bg-cover bg-center  overflow-hidden relative "
                     style={{ backgroundImage: `url(${concern.image})` }}
                   >
-                    <div className="absolute bottom-0 left-0 w-full bg-white/80 group-hover:bg-white/90 transition-colors p-6 text-2xl font-medium text-gray-900 font-sans" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                    {/* <div className="absolute bottom-0 left-0 w-full bg-white/80 group-hover:bg-white/90 transition-colors p-6 text-2xl font-medium text-gray-900 font-sans" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                       {concern.name}
-                    </div>
+                    </div> */}
                     <div className="absolute inset-0 group-hover:bg-black/10 transition-colors" />
                   </div>
                 </a>
